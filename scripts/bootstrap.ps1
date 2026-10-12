@@ -7,8 +7,35 @@ if (-not $installRoot) { throw 'A user-local installation folder could not be de
 [IO.Directory]::CreateDirectory($installRoot) | Out-Null
 $lock = $null
 $tempDir = $null
+$script:NodeCheckError = ''
 function Test-Node([string]$Path) {
- try { & $Path -e 'const [a,b]=process.versions.node.split(".").map(Number);process.exit(a>22||a===22&&b>=13?0:1)' 2>$null | Out-Null; return $LASTEXITCODE -eq 0 } catch { return $false }
+ $script:NodeCheckError = ''
+ try {
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { $script:NodeCheckError = 'node.exe was not found at ' + $Path; return $false }
+  # Windows PowerShell 5.1 can strip embedded quotes from native -e arguments.
+  # Use a simple native --version argument, with no JavaScript to quote.
+  $start = New-Object System.Diagnostics.ProcessStartInfo
+  $start.FileName = $Path
+  $start.Arguments = '--version'
+  $start.UseShellExecute = $false
+  $start.CreateNoWindow = $true
+  $start.RedirectStandardOutput = $true
+  $start.RedirectStandardError = $true
+  $process = New-Object System.Diagnostics.Process
+  $process.StartInfo = $start
+  try {
+   [void]$process.Start()
+   $output = $process.StandardOutput.ReadToEnd().Trim()
+   $errorOutput = $process.StandardError.ReadToEnd().Trim()
+   $process.WaitForExit()
+   if ($process.ExitCode -ne 0) { $script:NodeCheckError = 'node.exe exited with code ' + $process.ExitCode + ': ' + $errorOutput; return $false }
+   if ($output -notmatch '^v(\d+)\.(\d+)\.(\d+)$') { $script:NodeCheckError = 'Unexpected Node.js version output: ' + $output; return $false }
+   $major = [int]$Matches[1]
+   $minor = [int]$Matches[2]
+   if ($major -lt 22 -or ($major -eq 22 -and $minor -lt 13)) { $script:NodeCheckError = 'Node.js ' + $output + ' is too old; version 22.13 or later is required.'; return $false }
+   return $true
+  } finally { $process.Dispose() }
+ } catch { $script:NodeCheckError = $_.Exception.Message; return $false }
 }
 function Get-Download([string]$Url,[string]$Destination) {
  $previousProgress = $ProgressPreference
@@ -27,7 +54,7 @@ try {
  else {
   $architecture = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
   $arch = switch ($architecture.ToUpperInvariant()) { 'ARM64' { 'arm64' } 'AMD64' { 'x64' } default { throw 'This launcher requires a 64-bit Intel/AMD or ARM Windows computer.' } }
-  Write-Host 'Installing a private Node.js runtime for SPOT IT. Your system installation will not be changed.'
+  Write-Host ('Installing a private Node.js runtime for SPOT IT (' + $arch + '). Your system installation will not be changed.')
   $tempDir = Join-Path $installRoot ('.setup-' + [guid]::NewGuid().ToString('N'))
   [IO.Directory]::CreateDirectory($tempDir) | Out-Null
   $manifest = Join-Path $tempDir 'SHASUMS256.txt'
@@ -44,7 +71,7 @@ try {
   $unpacked = Join-Path $tempDir 'unpacked'
   Expand-Archive -LiteralPath $archive -DestinationPath $unpacked
   $downloaded = Join-Path $unpacked ($archiveName -replace '\.zip$','')
-  if (-not (Test-Node (Join-Path $downloaded 'node.exe'))) { throw 'The downloaded Node.js runtime cannot run on this computer.' }
+  if (-not (Test-Node (Join-Path $downloaded 'node.exe'))) { throw ('The downloaded Node.js runtime could not be verified. ' + $script:NodeCheckError) }
   $runtime = Join-Path $installRoot 'runtime'
   if (Test-Path $runtime) { Move-Item -LiteralPath $runtime -Destination (Join-Path $tempDir 'old-runtime') }
   Move-Item -LiteralPath $downloaded -Destination $runtime

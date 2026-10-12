@@ -1,0 +1,15 @@
+name: Windows launcher
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test private runtime installation using Windows PowerShell 5.1
+        shell: powershell
+        run: '& ([scriptblock]::Create([IO.File]::ReadAllText((Join-Path $env:GITHUB_WORKSPACE "scripts\test-windows-bootstrap.ps1"))))'
