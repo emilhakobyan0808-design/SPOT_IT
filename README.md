@@ -4,6 +4,8 @@ A local media literacy adventure for children aged 8–14. Learn to check inform
 
 **Languages:** Russian, English, Spanish, and Georgian. The interface, six lessons, 36 questions, explanations, shop, and interactive mascot helper are translated. The application runs on Windows and macOS without internet access after the initial dependency installation.
 
+**New to installing software? Start with the [Complete Beginner’s User Guide](USER_GUIDE.md).** It walks through Node.js installation, downloading and unpacking the project, first launch, profiles, languages, multiplayer, backups, updates, and troubleshooting.
+
 ## Download and run
 
 Install **Node.js 22.13 or later**, including npm, from [nodejs.org](https://nodejs.org/). Check the installed version with `node --version`.
