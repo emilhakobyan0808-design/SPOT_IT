@@ -1,0 +1,13 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import en from '../src/locales/en.json';
+import es from '../src/locales/es.json';
+import ka from '../src/locales/ka.json';
+import keys from '../src/locales/keys.json';
+import {translate} from '../src/i18n.tsx';
+import {questions} from '../server/question-bank.ts';
+import {lessons,items,merchandise} from '../shared/content.ts';
+const dictionaries={en,es,ka};
+test('All three translations cover every source string and preserve placeholders',()=>{for(const [lang,dictionary] of Object.entries(dictionaries)){assert.deepEqual(Object.keys(dictionary).sort(),[...keys].sort(),lang+' has missing or extra keys');for(const key of keys){const value=(dictionary as Record<string,string>)[key];assert.ok(value.trim(),lang+' has an empty translation: '+key);assert.equal(/[а-яё]/i.test(value),false,lang+' has Russian text: '+key);assert.deepEqual([...value.matchAll(/\{\d+\}/g)].map(x=>x[0]).sort(),[...key.matchAll(/\{\d+\}/g)].map(x=>x[0]).sort(),lang+' has invalid placeholders: '+key);}}});
+test('Every lesson, item, question, option and explanation is translated',()=>{const content=[...lessons.flatMap(l=>[l.title,l.short,l.intro,l.example,l.tip]),...items.flatMap(i=>[i.name,i.description]),...merchandise.flatMap(i=>[i.name,i.description]),...questions.flatMap(q=>[q.prompt,...q.options,q.explanation])];for(const [lang,dictionary] of Object.entries(dictionaries))for(const key of content){assert.ok((dictionary as Record<string,string>)[key],lang+' missing content: '+key);}});
+test('Formatting translates text and preserves profile names and numbers',()=>{const source='{0}, ты завершил {1} из 6 тем. У тебя {2} XP, уровень {3} и {4} монет. {5}';for(const lang of ['ru','en','es','ka'] as const){const formatted=translate(source,lang,'Лисёнок',2,150,2,45,'');assert.ok(formatted.includes('Лисёнок'));assert.ok(formatted.includes('150'));assert.ok(formatted.includes('45'));assert.ok(!/\{\d+\}/.test(formatted));}assert.equal(translate('Главная','en'),'Home');assert.equal(translate('Главная','es'),'Inicio');assert.ok(/[\u10a0-\u10ff]/.test(translate('Главная','ka')));});
