@@ -8,7 +8,7 @@ A local media literacy adventure for children aged 8–14. Learn to check inform
 
 ## Automatic setup — one command
 
-You can now install requirements and start SPOT IT automatically, even without Node.js already installed. The setup runs as your normal user and works from any current folder.
+You can now install requirements and start SPOT IT automatically, even without Node.js already installed. The setup runs as your normal user and works from any current folder. It now checks GitHub on each launch, prepares available updates before replacing files, and preserves player data. Stop the current server before relaunching to update. Offline launches use the installed version.
 
 Follow [Automatic setup and launch](docs/AUTO_START.md) for the macOS Terminal or Windows PowerShell command. The downloaded `START-MAC.command` and `START-WINDOWS.cmd` files use the same automatic setup.
 

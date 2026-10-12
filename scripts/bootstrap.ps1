@@ -102,6 +102,13 @@ try {
  if (-not (Test-Path $launcher)) { throw 'Choose the project folder containing scripts/launch.mjs.' }
  $lock.Dispose(); $lock = $null
  if ($tempDir -and (Test-Path $tempDir)) { Remove-Item -LiteralPath $tempDir -Recurse -Force; $tempDir = $null }
+ $updater = Join-Path $ProjectPath 'scripts\update.mjs'
+ if (-not (Test-Path $updater)) {
+  $updater = Join-Path $installRoot 'update.mjs'
+  try { Get-Download 'https://raw.githubusercontent.com/emilhakobyan0808-design/SPOT_IT/main/scripts/update.mjs' $updater } catch { Write-Host 'Update check is unavailable; using the installed version.' }
+ }
+ if (Test-Path $updater) { & $nodeBinary $updater --project $ProjectPath }
+ if ($ProjectPath -eq (Join-Path $installRoot 'app')) { Copy-Item -LiteralPath (Join-Path $ProjectPath 'scripts\bootstrap.ps1') -Destination (Join-Path $installRoot 'bootstrap.ps1') -Force }
  & $nodeBinary $launcher
  if ($LASTEXITCODE -ne 0) { throw 'SPOT IT did not start. Check the message above and run the launcher again.' }
 } catch { Write-Host ('SPOT IT setup failed: ' + $_.Exception.Message) -ForegroundColor Red; throw }

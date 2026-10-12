@@ -541,20 +541,22 @@ GitHub stores project files, **not your saved player progress**. Downloading a f
 
 ## 17. Install a newer version
 
-To update without losing progress:
+With the current automatic launcher, updating is part of starting SPOT IT:
 
-1. Stop the old server.
-2. Back up its entire `data` folder as described above.
-3. Download a new project ZIP from GitHub.
-4. Extract it into a **new, separate folder**.
-5. Copy the backed-up `data` folder into the new project folder, beside `package.json`.
-6. Run the new folder's launch file.
-7. Open the website and check that the profiles and progress are present.
-8. Keep the old folder and backup until you have confirmed the new version works.
+1. Stop the current server with **Control+C**.
+2. Run your usual launch command or open the normal Windows/Mac launch file.
+3. Let it check GitHub. If a newer version exists, it downloads and checks that version before replacing the old source files.
+4. Wait for the ready address and open the website. Your profiles, progress and purchases stay in the same data folder.
 
-Only run one version at a time on the default port. Keep the old copy stopped while trying the new one.
+You do not need to download a new ZIP or copy `data` for a normal automatic update. Keep a separate backup of `data` anyway, as described in section 16.
 
-A new download installs the libraries and builds the website for that version. Copying only a few source files into an old folder is less suitable for a beginner because the old build may still be displayed.
+If you installed SPOT IT before this update feature existed, follow the **One-time upgrade for older installers** section in the [Automatic Setup Guide](docs/AUTO_START.md). It provides a single current command for each operating system. After that, your normal launch checks for future updates.
+
+Without internet, SPOT IT starts its installed version. When online again, the next launch checks for updates. If an update cannot be downloaded or built, it leaves the working version available.
+
+If a SPOT IT server is still running, stop that window first. Updating files during a match is intentionally avoided.
+
+Manual ZIP replacement remains an alternative: stop the server, back up `data`, extract the new download into a separate folder, copy the backup into it, and launch the new folder. Keep the old folder until you have confirmed everything works. Developer Git checkouts use Git updates instead of automatic source replacement.
 
 ## 18. Troubleshooting
 

@@ -74,6 +74,13 @@ START
  chmod +x "$install_root/start.sh"
 fi
 [ -f "$project_path/scripts/launch.mjs" ] || { echo 'Choose the project folder containing scripts/launch.mjs.' >&2; exit 1; }
+updater="$project_path/scripts/update.mjs"
+if [ ! -f "$updater" ]; then
+ updater="$install_root/update.mjs"
+ curl --fail --location --silent --show-error --connect-timeout 10 --max-time 30 https://raw.githubusercontent.com/emilhakobyan0808-design/SPOT_IT/main/scripts/update.mjs -o "$updater" || true
+fi
+if [ -f "$updater" ]; then "$node_binary" "$updater" --project "$project_path"; fi
+if [ "$project_path" = "$install_root/app" ]; then cp "$project_path/scripts/bootstrap.sh" "$install_root/bootstrap.sh"; fi
 cleanup
 trap - EXIT
 exec "$node_binary" "$project_path/scripts/launch.mjs"

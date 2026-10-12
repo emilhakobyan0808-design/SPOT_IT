@@ -28,10 +28,11 @@ Use PowerShell for the Windows command, not Command Prompt. No change to PowerSh
 2. Setup checks whether a compatible Node.js installation and npm are available.
 3. If needed, it downloads an official Node.js 24 runtime for your computer's architecture. Its SHA-256 checksum is checked against the official manifest before installation.
 4. Setup downloads the project ZIP from GitHub if it has not already been installed.
-5. The shared launcher checks the project dependencies. Missing or changed dependencies are installed using the committed lock file.
-6. The launcher builds the website if needed. Source changes cause it to rebuild; unchanged files do not.
-7. It starts the server and waits for its readiness response.
-8. It opens the ready website in the default browser. Keep the terminal window open while playing.
+5. Each launch checks GitHub for a newer app revision. An available update is downloaded and built separately before it replaces source files. Player data is kept untouched. If GitHub is unreachable, the installed version is used.
+6. The shared launcher checks the project dependencies. Missing or changed dependencies are installed using the committed lock file.
+7. The launcher builds the website if needed. Source changes cause it to rebuild; unchanged files do not.
+8. It starts the server and waits for its readiness response.
+9. It opens the ready website in the default browser. Keep the terminal window open while playing.
 
 The first run needs internet access and may take several minutes. Subsequent runs need no internet when the cached script, runtime, project, dependencies, and build are complete and unchanged.
 
@@ -71,7 +72,36 @@ Replace the example path with the actual path on your computer. `npm run launch`
 
 Press **Control+C** in the running terminal to stop. Run the same command or launch file next time. Progress and purchases are preserved in the installation's `data` folder.
 
-Setup reuses an existing complete project; it does not silently replace its source with a newer GitHub version. To install a new app version, stop the server, back up `data`, download and extract the new project into a separate folder, copy the backup into it, and use that folder's launch file. Keep the old copy until the new one works. The automatic command continues to refer to its managed installation until that managed copy is updated separately.
+### Updating is now the normal launch
+
+1. Stop the running server with **Control+C**.
+2. Run your usual launch command or double-click the launch file.
+3. If GitHub has a newer version, setup downloads it, installs its libraries and verifies its build before changing the installed files.
+4. SPOT IT starts with your existing profiles, progress and purchases.
+
+There is no need to download another ZIP or copy the database manually. An unchanged version is not downloaded again. If there is no internet or update preparation fails, the working installed version starts instead.
+
+Source backups are created beside the app in folders beginning `.spot-it-backup-`. These backups contain previous source files and supporting libraries; the live database remains in the app's `data` folder. Keep separate data backups as described in the User Guide.
+
+If SPOT IT is still running, setup asks you to stop it rather than replacing files during a match. A Git checkout containing `.git` is treated as a developer checkout and is not automatically replaced.
+
+### One-time upgrade for older installers
+
+If your saved installer was created before automatic updates were added, run the current setup once directly from GitHub:
+
+**Mac, Terminal:**
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/emilhakobyan0808-design/SPOT_IT/main/scripts/bootstrap.sh | bash
+```
+
+**Windows, PowerShell:**
+
+```powershell
+& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/emilhakobyan0808-design/SPOT_IT/main/scripts/bootstrap.ps1')))
+```
+
+After this one-time upgrade, the saved launch command and start file check for future updates automatically. Internet is needed for this upgrade; existing player data is retained.
 
 ## If something goes wrong
 
@@ -88,13 +118,14 @@ See the [Complete Beginner's User Guide](../USER_GUIDE.md) for profiles, lessons
 
 ## Verification and developer options
 
-On macOS, private runtime download and checksum verification, first dependency installation, production build, startup from an unrelated directory, and cached repeat launch have been tested. Automated tests cover source fingerprints, missing dependencies, cached builds, occupied ports, and existing server recognition. A physical Windows end-to-end test is still required.
+On macOS, private runtime download and checksum verification, first dependency installation, production build, startup from an unrelated directory, and cached repeat launch have been tested. Automated tests cover source fingerprints, missing dependencies, cached builds, occupied ports, and existing server recognition. Update tests also cover database preservation, source backups, incomplete updates, offline fallback, and unchanged revisions. A physical Windows end-to-end test is still required.
 
 Developer options:
 
 - `node scripts/launch.mjs --no-open` or `SPOT_IT_NO_OPEN=1`: do not open a browser.
 - `node scripts/launch.mjs --port 3010` or `PORT=3010`: choose the initial port.
 - `SPOT_IT_HOME`: use a different private setup folder.
+- `SPOT_IT_SKIP_UPDATE=1`: deliberately skip the GitHub update check for this run.
 - `SPOT_IT_FORCE_RUNTIME=1`: use the private runtime instead of a system Node.js installation.
 
 The setup code is in [`bootstrap.sh`](../scripts/bootstrap.sh), [`bootstrap.ps1`](../scripts/bootstrap.ps1), and [`launch.mjs`](../scripts/launch.mjs). Official platform references: [Node.js release downloads](https://nodejs.org/dist/index.json), [PowerShell Invoke-RestMethod](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-restmethod?view=powershell-5.1).
