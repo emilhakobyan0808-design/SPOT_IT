@@ -6,6 +6,14 @@ This guide takes you from a computer with no SPOT IT installation to a working w
 
 The instructions describe the current local version. Installation and startup have been tested on macOS. Windows launch files are included, but a Windows computer has not yet been used for end-to-end verification.
 
+## Fastest option: let SPOT IT set itself up
+
+You can now start from one command without manually installing Node.js or downloading the project first. Open the [Automatic Setup Guide](docs/AUTO_START.md), choose **macOS Terminal** or **Windows PowerShell**, and paste its one-line command. It checks and installs missing requirements, downloads the project, builds it, and opens the website. The command works from any current folder.
+
+The first run needs internet access. Later runs reuse the saved installation and can work offline. No administrator rights are required for the private runtime. Keep the terminal open while playing; press Control+C to stop.
+
+If you have already downloaded the ZIP, its launch files now perform these checks and installation automatically too. The manual Node.js steps below are an alternative route, not a requirement for automatic setup.
+
 ## Contents
 
 1. [Understand what you are installing](#1-understand-what-you-are-installing)
@@ -217,7 +225,7 @@ You do not need to open or edit those other files. Keep the folder together: mov
 3. A command window opens. It may have a dark background and scrolling text.
 4. Leave it open and let it work.
 
-During the first run, it installs supporting libraries and builds the website. You may see messages about packages, files, or a build. These are normal steps, not questions you have to answer.
+During the first run, it checks Node.js, installs a private runtime if needed, installs supporting libraries, and builds the website. You may see messages about packages, files, or a build. These are normal steps, not questions you have to answer.
 
 Do not close the window while those steps are running. Do not repeatedly double-click the launch file: one running copy is enough.
 
@@ -507,7 +515,7 @@ Closing a browser tab only closes the page. It does not stop the server.
 4. Open `http://localhost:3000/`.
 5. Select your profile if necessary.
 
-You do not need to download the project or reinstall Node.js every time. The supporting libraries and website build remain in the project folder.
+You do not need to download the project or reinstall Node.js every time. The supporting libraries and website build remain in the project folder. The launcher also checks for source changes and rebuilds when needed.
 
 If the folder's supporting libraries or build were removed, the launcher may install or build them again.
 

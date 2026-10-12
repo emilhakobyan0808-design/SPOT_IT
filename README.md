@@ -6,6 +6,12 @@ A local media literacy adventure for children aged 8–14. Learn to check inform
 
 **New to installing software? Start with the [Complete Beginner’s User Guide](USER_GUIDE.md).** It walks through Node.js installation, downloading and unpacking the project, first launch, profiles, languages, multiplayer, backups, updates, and troubleshooting.
 
+## Automatic setup — one command
+
+You can now install requirements and start SPOT IT automatically, even without Node.js already installed. The setup runs as your normal user and works from any current folder.
+
+Follow [Automatic setup and launch](docs/AUTO_START.md) for the macOS Terminal or Windows PowerShell command. The downloaded `START-MAC.command` and `START-WINDOWS.cmd` files use the same automatic setup.
+
 ## Download and run
 
 Install **Node.js 22.13 or later**, including npm, from [nodejs.org](https://nodejs.org/). Check the installed version with `node --version`.
@@ -13,8 +19,10 @@ Install **Node.js 22.13 or later**, including npm, from [nodejs.org](https://nod
 1. Open [the GitHub repository](https://github.com/emilhakobyan0808-design/SPOT_IT).
 2. Choose **Code → Download ZIP**, then extract the entire archive to a folder you can write to.
 3. Open **START-WINDOWS.cmd** on Windows or **START-MAC.command** on macOS.
-4. The launcher installs dependencies on the first run and builds the application if no build is available. Internet access is needed for the initial installation.
+4. The launcher checks Node.js, installs a private runtime if needed, installs dependencies, and rebuilds when necessary. Internet access is needed for initial downloads.
 5. Open **http://localhost:3000/** and keep the terminal window open while using the app.
+
+For automatic setup, manually installing Node.js is optional. For the manual commands below, Node.js must already be installed.
 
 On macOS, if the launcher is not executable, open Terminal in the extracted project folder and run `bash START-MAC.command`. If the operating system prevents launching the file, use the manual commands below.
 
@@ -103,11 +111,12 @@ The server validates answer order, purchases, balances, and rewards. Duplicate a
 
 Player data is created automatically in **`data/spot-it.sqlite`**. Profiles, completed lessons, best results, balances, purchases, equipped items, and profile sessions persist across restarts. Battle rooms and timers are held in memory.
 
-To back up progress, **stop the server and copy the entire `data` folder**. Keep this folder when updating the application. Do not copy the database while it is being written. Git and downloadable source archives exclude player data.
+To back up progress, **stop the server and copy the entire `data` folder**. Keep this folder when updating the application. Do not copy the database while it is being written. Git and downloadable source archives exclude player data. Automatic launcher state and its package cache are stored in `.spot-it/`, also excluded from Git.
 
 ## Development and tests
 
 ```sh
+npm run launch    # Check requirements, build if needed, and start
 npm run dev       # Backend and frontend development server
 npm run check     # TypeScript checks
 npm test          # Server, persistence, multiplayer, shop, and translation tests
@@ -115,7 +124,7 @@ npm run build     # TypeScript checks and production frontend build
 npm start         # Serve the production build
 ```
 
-Tests use separate temporary databases and do not change your saved progress. Coverage includes profile switching, sequential lesson unlocking, server grading, duplicate reward protection, shop purchases, collectibles, equipment, persistence after a full server restart, real Socket.IO clients, secret answers before round completion, full rooms, host handover, disconnects, and translation completeness.
+Launcher tests also verify cached setup, dependency recovery, and execution from another working folder. Tests use separate temporary databases and do not change your saved progress. Coverage includes profile switching, sequential lesson unlocking, server grading, duplicate reward protection, shop purchases, collectibles, equipment, persistence after a full server restart, real Socket.IO clients, secret answers before round completion, full rooms, host handover, disconnects, and translation completeness.
 
 **Verification:** tested on macOS with Node.js 22.20. TypeScript checks, production builds, automated tests, and HTTP serving passed. Multiplayer was tested using separate network clients on one computer. Windows startup and play between physically separate devices still need verification. Visual browser QA has not been completed because permission to access the local preview was declined.
 

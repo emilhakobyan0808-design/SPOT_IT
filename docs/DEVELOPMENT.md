@@ -19,7 +19,7 @@ One Node.js process serves the HTTP API, Socket.IO battle rooms, and the fronten
 | `server/battles.ts` | Socket.IO authentication, room lifecycle, grading, and timers |
 | `tests/` | API, persistence, multiplayer, and localization tests |
 | `public/` | Local images, favicon, brand references, and asset provenance |
-| `scripts/` | Build entry point and Node.js version validation |
+| `scripts/` | Platform bootstrap scripts, shared automatic launcher, build entry point, and Node.js version validation |
 
 ## Storage model
 
@@ -111,6 +111,6 @@ npm start
 
 `npm run build` checks TypeScript and calls Vite through `scripts/build.mjs`. The lock file is committed; use `npm ci` for a reproducible installation. Test fixtures use temporary databases and actual separate Socket.IO clients.
 
-Before updating an existing installation, stop the server and back up `data`. Update source files, install locked dependencies, rebuild, and start the app. The double-click launchers build only when `dist/index.html` is missing; rebuild manually after modifying an existing source checkout.
+Before updating an existing installation, stop the server and back up `data`. Update source files, install locked dependencies, rebuild, and start the app. The double-click launchers now use automatic setup and a shared launcher. Fingerprints in `.spot-it/state.json` track dependency inputs, platform, Node major version, and build inputs. Missing dependencies trigger installation; changed frontend sources trigger rebuilding. See [Automatic Setup](AUTO_START.md) for installation locations and entry commands.
 
-Git excludes `node_modules`, `dist`, `data`, and logs. Do not commit player databases, session tokens, or local credentials. Runtime images and reference assets remain tracked so a downloaded project runs without an external image service.
+Git excludes `node_modules`, `dist`, `data`, `.spot-it`, and logs. Do not commit player databases, session tokens, or local credentials. Runtime images and reference assets remain tracked so a downloaded project runs without an external image service.

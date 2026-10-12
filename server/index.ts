@@ -1,3 +1,4 @@
+import {realpathSync} from 'node:fs';
 import express from 'express';
 import {createServer} from 'node:http';
 import {resolve,dirname} from 'node:path';
@@ -16,7 +17,7 @@ export async function createApplication({dbPath=resolve(root,'data/spot-it.sqlit
  type Attempt={id:string;profile:string;mode:'lesson'|'quiz';topic:number;ids:string[];answers:{choice:number;correct:boolean}[];finished:boolean;result?:unknown};
  const auth=(req:express.Request)=>{const token=(req.headers.authorization||'').replace(/^Bearer /,'');const id=store.identity(token);if(!id)throw new Error('Сначала выбери профиль');return store.get(id)!;};
  function route(method:'get'|'post',path:string,fn:(req:express.Request)=>unknown){app[method](path,(req,res)=>{try{res.json(fn(req));}catch(e){res.status(400).json({error:e instanceof Error?e.message:'Не удалось выполнить действие'});}});}
- route('get','/api/health',()=>({ok:true}));route('get','/api/profiles',()=>store.all());
+ route('get','/api/health',()=>({ok:true,app:'spot-it',version:'1.0.0'}));route('get','/api/profiles',()=>store.all());
  route('post','/api/profiles',req=>{const name=String(req.body.nickname||'').trim();if(name.length<2||name.length>20)throw new Error('Никнейм должен содержать от 2 до 20 символов');if(store.all().length>=50)throw new Error('На этом компьютере уже создано 50 профилей');const avatar=['sun','star','leaf','moon'].includes(req.body.avatar)?req.body.avatar:'sun';const profile=store.create(name,avatar);return {profile,token:store.session(profile.id)};});
  route('post','/api/session',req=>{const p=store.get(String(req.body.id));if(!p)throw new Error('Профиль не найден');return {profile:p,token:store.session(p.id)};});
  route('get','/api/me',req=>auth(req));
@@ -29,6 +30,6 @@ export async function createApplication({dbPath=resolve(root,'data/spot-it.sqlit
  if(viteEnabled){if(production){app.use(express.static(resolve(root,'dist')));app.get('/{*path}',(_req,res)=>res.sendFile(resolve(root,'dist/index.html')));}else{const {createServer}=await import('vite');vite=await createServer({root,configFile:false,server:{middlewareMode:true,fs:{deny:['**/.git/**','**/.env*','**/server/**','**/tests/**','**/data/**','**/*.sqlite*']}}});app.use(vite.middlewares);}}
  return {http,store,io,close:async()=>{stopBattles();await vite?.close();await new Promise<void>(r=>io.close(()=>r()));store.close();}};
 }
-if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+if(process.argv[1]&&realpathSync(process.argv[1])===fileURLToPath(import.meta.url)){
  const application=await createApplication({production:process.argv.includes('--production')});const port=Number(process.env.PORT||3000);application.http.listen(port,'0.0.0.0',()=>{console.log(`SPOT IT: http://localhost:${port}`);for(const list of Object.values(networkInterfaces()))for(const n of list||[])if(n.family==='IPv4'&&!n.internal)console.log(`Local network: http://${n.address}:${port}`);});let closing=false;const stop=async()=>{if(closing)return;closing=true;await application.close();process.exit(0);};process.on('SIGINT',stop);process.on('SIGTERM',stop);
 }
